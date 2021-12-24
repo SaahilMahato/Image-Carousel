@@ -12,3 +12,12 @@
     clear: both;
     display: table;
 }
+
+h1 {
+    text-align: center;
+}
+
+.carousel-container {
+    margin: 1% auto;
+    border-radius: 10px;
+}

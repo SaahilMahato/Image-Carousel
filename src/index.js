@@ -1,3 +1,10 @@
+/**
+    * @param {string} container - name of the container with .for classname and # for id
+    * @param {string} wrapper - name of the image wrapper with .for classname and # for id
+    * @param {string} width - width of the container
+    * @param {string} height - height of the container
+*/
+
 class Slider {
     constructor(container, wrapper, width, height) {
 
@@ -8,9 +15,9 @@ class Slider {
         this.height = height;
 
         // create attributes needed for processing
-        this.index = 0;
+        this.index = 0; // stores current index of navigator
         this.images = this.wrapper.getElementsByTagName('img');
-        this.pixelsPerInterval = 5;
+        this.pixelsPerInterval = 10; // determines how much the images slides in pixels when a move method is called
 
         //create attributes needed for new elements
         this.rightButton;
@@ -19,25 +26,25 @@ class Slider {
         this.radio = [];
 
         // call setup functions
-        this.setContainerLayout();
-        this.setWrapperLayout();
-        this.addNavigationButtons();
-        this.addIndicator();
+        this.setupContainerLayout();
+        this.setupWrapperLayout();
+        this.setupNavigationButtons();
+        this.setupIndicator();
         this.determineButtonStatus();
     }
 
-    setContainerLayout = () => {
+    setupContainerLayout = () => {
         this.container.style.width = this.width;
         this.container.style.height = this.height;
         this.container.style.overflow = 'hidden';
         this.container.style.position = 'relative';
     }
 
-    setWrapperLayout = () => {
-        this.wrapper.style.minWidth = '1000vw';
+    setupWrapperLayout = () => {
+        this.wrapper.style.minWidth = '1000vw'; // just needs to be large enough to hold all the images horizontally
         this.wrapper.style.height = this.height;
         this.wrapper.style.position = 'absolute';
-        this.wrapper.style.left = '-0px';
+        this.wrapper.style.left = '-0px'; // use negative because the left attribute is used to animate the images
 
         for (let j=0; j<this.images.length; j++) {
             this.images[j].style.width = this.width;
@@ -46,17 +53,17 @@ class Slider {
         }
     }
 
-    addNavigationButtons = () => {
-
+    setupNavigationButtons = () => {
+        // function that sets same attributes for both buttons. used to reduce code repetition
         const styleButton = (button) => {
             button.style.position = 'absolute';
-            button.style.top = parseInt(this.height)/2 - 20 + 'px';
-            button.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            button.style.top = parseInt(this.height)/2 - 20 + 'px'; // calculate on the basis of height
+            button.style.backgroundColor = 'rgba(0,0,0,0.5)'; // set transparency
             button.style.border = 'none';
             button.style.fontSize = '48px';
             button.style.color = 'white';
             button.style.borderRadius = '50%';
-            button.style.paddingBottom = '3%';
+            button.style.paddingBottom = '16px'; // hit and trial. works for all viewport sizes on my PC.
             button.addEventListener('mouseover', () => button.style.cursor = 'pointer');
         }
 
@@ -77,6 +84,7 @@ class Slider {
         this.container.appendChild(this.leftButton);
     }
 
+    // functions that decides the visibility of the buttons based on the index we are in. called on object creation and each animation end 
     determineButtonStatus = () => {
         if (this.index === 0) {
             this.leftButton.style.display = 'none';
@@ -92,11 +100,13 @@ class Slider {
         }
     }
 
+    // disable button after animation start
     afterMoveStart = () => {
         this.rightButton.disabled = true;
         this.leftButton.disabled = true;
     }
 
+    // enable button and change radiobutton and nav button status after animation ends
     afterMoveStop = () => {
         this.rightButton.disabled = false;
         this.leftButton.disabled = false;
@@ -104,17 +114,17 @@ class Slider {
         this.determineButtonStatus();
     }
 
-    addIndicator = () => {
+    setupIndicator = () => {
         this.radioGroup = document.createElement('div');
         this.radioGroup.style.position = 'absolute';
-        this.radioGroup.style.left = parseInt(this.width)/2.5 + 'px';
-        this.radioGroup.style.bottom = 0 + 'px';
+        this.radioGroup.style.left = (parseInt(this.width)/2) - (this.images.length*15/2) + 'px'; // width/2 - width_of_indicator/2 
+        this.radioGroup.style.bottom = '0px';
 
         for (let i=0; i<this.images.length; i++) {
             const newRadio = document.createElement('input');
             newRadio.type = 'radio';
             newRadio.name = 'indicator';
-            newRadio.value = i;
+            newRadio.value = i; // value of each radio button is the index of image
             newRadio.style.margin = '0px 1px';
 
             newRadio.addEventListener('click', () => {
@@ -124,7 +134,7 @@ class Slider {
 
                 const moveToIndicator = () => {
                     if (prev_index == this.index)
-                        return;
+                        return; // if no change in index don't move
                     else if (prev_index > this.index)
                         direction = this.pixelsPerInterval;
                     else 
@@ -150,7 +160,7 @@ class Slider {
     }
 
     next = () => {
-        if (this.index < this.images.length - 1) {
+        if (this.index < this.images.length - 1) { // fail safe to not go beyond limits
             this.index++;
 
             const moveLeft = () => {
@@ -167,7 +177,7 @@ class Slider {
     }
     
     previous = () => {
-        if (this.index > 0) {
+        if (this.index > 0) { // fail safe to not go beyond limits
             this.index--;
 
             const moveRight = () => {
@@ -186,4 +196,4 @@ class Slider {
 
 
 // driver code
-const slider = new Slider('.carousel-container', '.carousel-image-wrapper', '500px', '300px');
+const slider = new Slider('.carousel-container', '.carousel-image-wrapper', '700px', '400px');
