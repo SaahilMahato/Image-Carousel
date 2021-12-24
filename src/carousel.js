@@ -123,6 +123,7 @@ class Carousel {
             newRadio.name = 'indicator';
             newRadio.value = i; // value of each radio button is the index of image
             newRadio.style.margin = '0px 1px';
+            newRadio.addEventListener('mouseover', () => newRadio.style.cursor = 'pointer');
 
             newRadio.addEventListener('click', () => {
                 let prev_index = this.index;
