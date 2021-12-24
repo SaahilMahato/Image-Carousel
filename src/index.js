@@ -10,15 +10,20 @@ class Slider {
         // create attributes needed for processing
         this.index = 0;
         this.images = this.wrapper.getElementsByTagName('img');
+        this.pixelsPerInterval = 5;
 
         //create attributes needed for new elements
         this.rightButton;
         this.leftButton;
+        this.radioGroup;
+        this.radio = [];
 
         // call setup functions
         this.setContainerLayout();
         this.setWrapperLayout();
         this.addNavigationButtons();
+        this.addIndicator();
+        this.determineButtonStatus();
     }
 
     setContainerLayout = () => {
@@ -46,13 +51,15 @@ class Slider {
         const styleButton = (button) => {
             button.style.position = 'absolute';
             button.style.top = parseInt(this.height)/2 - 20 + 'px';
-            button.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            button.style.backgroundColor = 'rgba(0,0,0,0.5)';
             button.style.border = 'none';
             button.style.fontSize = '48px';
             button.style.color = 'white';
             button.style.borderRadius = '50%';
+            button.style.paddingBottom = '3%';
             button.addEventListener('mouseover', () => button.style.cursor = 'pointer');
         }
+
         // right button
         this.rightButton = document.createElement('button');
         this.rightButton.innerHTML = '&rarr;';
@@ -70,20 +77,92 @@ class Slider {
         this.container.appendChild(this.leftButton);
     }
 
+    determineButtonStatus = () => {
+        if (this.index === 0) {
+            this.leftButton.style.display = 'none';
+            this.rightButton.style.display = 'block';
+        }
+        else if (this.index === this.images.length - 1) {
+            this.leftButton.style.display = 'block';
+            this.rightButton.style.display = 'none';
+        }
+        else {
+            this.leftButton.style.display = 'block';
+            this.rightButton.style.display = 'block';
+        }
+    }
+
+    afterMoveStart = () => {
+        this.rightButton.disabled = true;
+        this.leftButton.disabled = true;
+    }
+
+    afterMoveStop = () => {
+        this.rightButton.disabled = false;
+        this.leftButton.disabled = false;
+        this.radio[this.index].checked = true;
+        this.determineButtonStatus();
+    }
+
+    addIndicator = () => {
+        this.radioGroup = document.createElement('div');
+        this.radioGroup.style.position = 'absolute';
+        this.radioGroup.style.left = parseInt(this.width)/2.5 + 'px';
+        this.radioGroup.style.bottom = 0 + 'px';
+
+        for (let i=0; i<this.images.length; i++) {
+            const newRadio = document.createElement('input');
+            newRadio.type = 'radio';
+            newRadio.name = 'indicator';
+            newRadio.value = i;
+            newRadio.style.margin = '0px 1px';
+
+            newRadio.addEventListener('click', () => {
+                let prev_index = this.index;
+                this.index = parseInt(newRadio.value);
+                let direction;
+
+                const moveToIndicator = () => {
+                    if (prev_index == this.index)
+                        return;
+                    else if (prev_index > this.index)
+                        direction = this.pixelsPerInterval;
+                    else 
+                        direction = -this.pixelsPerInterval;
+                    
+                    this.wrapper.style.left = (parseInt(this.wrapper.style.left) + direction) + 'px';
+
+                    if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
+                        clearInterval(nextInterval);
+                        this.afterMoveStop();
+                    }
+                }
+    
+                const nextInterval = setInterval(moveToIndicator, 1);
+                this.afterMoveStart();
+            });
+
+            this.radio.push(newRadio);
+            this.radioGroup.appendChild(newRadio);
+        }
+        this.radio[0].checked = true;
+        this.container.appendChild(this.radioGroup);
+    }
+
     next = () => {
         if (this.index < this.images.length - 1) {
             this.index++;
 
             const moveLeft = () => {
-                this.wrapper.style.left = (parseInt(this.wrapper.style.left) - 1) + 'px';
+                this.wrapper.style.left = (parseInt(this.wrapper.style.left) - this.pixelsPerInterval) + 'px';
                 if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
                     clearInterval(nextInterval);
-                    this.rightButton.disabled = false;
+                    this.afterMoveStop();
                 }
             }
 
             const nextInterval = setInterval(moveLeft, 1);
-            this.rightButton.disabled = true;
+            this.afterMoveStart();
         }
     }
     
@@ -92,15 +171,15 @@ class Slider {
             this.index--;
 
             const moveRight = () => {
-                this.wrapper.style.left = (parseInt(this.wrapper.style.left) + 1) + 'px';
+                this.wrapper.style.left = (parseInt(this.wrapper.style.left) + this.pixelsPerInterval) + 'px';
                 if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
                     clearInterval(nextInterval);
-                    this.leftButton.disabled = false;
+                    this.afterMoveStop();
                 }
             }
 
             const nextInterval = setInterval(moveRight, 1);
-            this.leftButton.disabled = true;
+            this.afterMoveStart();
         }
     }
 }
