@@ -1,16 +1,15 @@
 /**
     * @param {string} container - name of the container with .for classname and # for id
-    * @param {string} wrapper - name of the image wrapper with .for classname and # for id
     * @param {string} width - width of the container
     * @param {string} height - height of the container
 */
 
 class Slider {
-    constructor(container, wrapper, width, height) {
+    constructor(container, width, height) {
 
         // store arguments
         this.container = document.querySelector(container);
-        this.wrapper = document.querySelector(wrapper);
+        this.wrapper = this.container.querySelector('.carousel-image-wrapper');
         this.width = width;
         this.height = height;
 
@@ -30,7 +29,6 @@ class Slider {
         this.setupWrapperLayout();
         this.setupNavigationButtons();
         this.setupIndicator();
-        this.determineButtonStatus();
     }
 
     setupContainerLayout = () => {
@@ -57,7 +55,7 @@ class Slider {
         // function that sets same attributes for both buttons. used to reduce code repetition
         const styleButton = (button) => {
             button.style.position = 'absolute';
-            button.style.top = parseInt(this.height)/2 - 20 + 'px'; // calculate on the basis of height
+            button.style.top = parseInt(this.height)/2 - 32 + 'px'; // calculate on the basis of height
             button.style.backgroundColor = 'rgba(0,0,0,0.5)'; // set transparency
             button.style.border = 'none';
             button.style.fontSize = '48px';
@@ -111,7 +109,6 @@ class Slider {
         this.rightButton.disabled = false;
         this.leftButton.disabled = false;
         this.radio[this.index].checked = true;
-        this.determineButtonStatus();
     }
 
     setupIndicator = () => {
@@ -160,7 +157,7 @@ class Slider {
     }
 
     next = () => {
-        if (this.index < this.images.length - 1) { // fail safe to not go beyond limits
+        if (this.index < this.images.length - 1) {
             this.index++;
 
             const moveLeft = () => {
@@ -174,14 +171,42 @@ class Slider {
             const nextInterval = setInterval(moveLeft, 1);
             this.afterMoveStart();
         }
+        else {
+            this.index = 0;
+
+            const moveLeft = () => {
+                this.wrapper.style.left = (parseInt(this.wrapper.style.left) + this.pixelsPerInterval*3) + 'px';
+                if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
+                    clearInterval(nextInterval);
+                    this.afterMoveStop();
+                }
+            }
+
+            const nextInterval = setInterval(moveLeft, 1);
+            this.afterMoveStart();
+        }
     }
     
     previous = () => {
-        if (this.index > 0) { // fail safe to not go beyond limits
+        if (this.index > 0) {
             this.index--;
 
             const moveRight = () => {
                 this.wrapper.style.left = (parseInt(this.wrapper.style.left) + this.pixelsPerInterval) + 'px';
+                if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
+                    clearInterval(nextInterval);
+                    this.afterMoveStop();
+                }
+            }
+
+            const nextInterval = setInterval(moveRight, 1);
+            this.afterMoveStart();
+        }
+        else {
+            this.index = this.images.length-1;
+
+            const moveRight = () => {
+                this.wrapper.style.left = (parseInt(this.wrapper.style.left) - this.pixelsPerInterval*3) + 'px';
                 if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
                     clearInterval(nextInterval);
                     this.afterMoveStop();
@@ -196,4 +221,4 @@ class Slider {
 
 
 // driver code
-const slider = new Slider('.carousel-container', '.carousel-image-wrapper', '700px', '400px');
+const slider = new Slider('.carousel-container', '900px', '500px');
