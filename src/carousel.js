@@ -16,7 +16,7 @@ class Carousel {
         // create attributes needed for processing
         this.index = 0; // stores current index of navigator
         this.images = this.wrapper.getElementsByTagName('img');
-        this.pixelsPerInterval = 10; // determines how much the images slides in pixels when a move method is called
+        this.pixelsPerInterval = 10; // determines how much the images slides in pixels when slide is called. Lower means smoother animation
 
         //create attributes needed for new elements
         this.rightButton;
@@ -56,13 +56,20 @@ class Carousel {
         const styleButton = (button) => {
             button.style.position = 'absolute';
             button.style.top = parseInt(this.height)/2 - 32 + 'px'; // calculate on the basis of height
-            button.style.backgroundColor = 'rgba(0,0,0,0.5)'; // set transparency
+            button.style.backgroundColor = 'rgba(0,0,0,0)'; // set transparency
             button.style.border = 'none';
             button.style.fontSize = '48px';
             button.style.color = 'white';
             button.style.borderRadius = '50%';
             button.style.paddingBottom = '16px'; // hit and trial. works for all viewport sizes on my PC.
-            button.addEventListener('mouseover', () => button.style.cursor = 'pointer');
+            button.addEventListener('mouseover', () => {
+                button.style.cursor = 'pointer';
+                button.style.backgroundColor = 'rgba(0,0,0,0.5)';
+            });
+            button.addEventListener('mouseout', () => {
+                button.style.cursor = 'none';
+                button.style.backgroundColor = 'rgba(0,0,0,0)';
+            });
         }
 
         // right button
@@ -82,33 +89,20 @@ class Carousel {
         this.container.appendChild(this.leftButton);
     }
 
-    // functions that decides the visibility of the buttons based on the index we are in. called on object creation and each animation end 
-    determineButtonStatus = () => {
-        if (this.index === 0) {
-            this.leftButton.style.display = 'none';
-            this.rightButton.style.display = 'block';
-        }
-        else if (this.index === this.images.length - 1) {
-            this.leftButton.style.display = 'block';
-            this.rightButton.style.display = 'none';
-        }
-        else {
-            this.leftButton.style.display = 'block';
-            this.rightButton.style.display = 'block';
+    slideLeft = (speed) => {
+        if (parseInt(this.wrapper.style.left) > (- this.index * parseInt(this.width))){
+            this.wrapper.style.left = (parseInt(this.wrapper.style.left) + speed) + 'px';
+            window.requestAnimationFrame(() => this.slideLeft(speed));
+            this.radio[this.index].checked = true;
         }
     }
 
-    // disable button after animation start
-    afterMoveStart = () => {
-        this.rightButton.disabled = true;
-        this.leftButton.disabled = true;
-    }
-
-    // enable button and change radiobutton and nav button status after animation ends
-    afterMoveStop = () => {
-        this.rightButton.disabled = false;
-        this.leftButton.disabled = false;
-        this.radio[this.index].checked = true;
+    slideRight = (speed) => {
+        if (parseInt(this.wrapper.style.left) < (- this.index * parseInt(this.width))){
+            this.wrapper.style.left = (parseInt(this.wrapper.style.left) + speed) + 'px';
+            window.requestAnimationFrame(() => this.slideRight(speed));
+            this.radio[this.index].checked = true;
+        }
     }
 
     setupIndicator = () => {
@@ -128,26 +122,18 @@ class Carousel {
             newRadio.addEventListener('click', () => {
                 let prev_index = this.index;
                 this.index = parseInt(newRadio.value);
-                let direction;
+                let speed;
 
-                const moveToIndicator = () => {
-                    if (prev_index == this.index)
-                        return; // if no change in index don't move
-                    else if (prev_index > this.index)
-                        direction = this.pixelsPerInterval;
-                    else 
-                        direction = -this.pixelsPerInterval;
-                    
-                    this.wrapper.style.left = (parseInt(this.wrapper.style.left) + direction) + 'px';
-
-                    if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
-                        clearInterval(nextInterval);
-                        this.afterMoveStop();
-                    }
+                if (prev_index == this.index)
+                    return; // if no change in index don't move
+                else if (prev_index > this.index) {
+                    speed = this.pixelsPerInterval * this.images.length;
+                    this.slideRight(speed);
                 }
-    
-                const nextInterval = setInterval(moveToIndicator, 1);
-                this.afterMoveStart();
+                else {
+                    speed = -this.pixelsPerInterval * this.images.length;
+                    this.slideLeft(speed);
+                }
             });
 
             this.radio.push(newRadio);
@@ -158,64 +144,30 @@ class Carousel {
     }
 
     next = () => {
+        let speed;
         if (this.index < this.images.length - 1) {
             this.index++;
-
-            const moveLeft = () => {
-                this.wrapper.style.left = (parseInt(this.wrapper.style.left) - this.pixelsPerInterval) + 'px';
-                if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
-                    clearInterval(nextInterval);
-                    this.afterMoveStop();
-                }
-            }
-
-            const nextInterval = setInterval(moveLeft, 1);
-            this.afterMoveStart();
+            speed = -this.pixelsPerInterval;
+            this.slideLeft(speed);
         }
         else {
             this.index = 0;
-
-            const moveLeft = () => {
-                this.wrapper.style.left = (parseInt(this.wrapper.style.left) + this.pixelsPerInterval*3) + 'px';
-                if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
-                    clearInterval(nextInterval);
-                    this.afterMoveStop();
-                }
-            }
-
-            const nextInterval = setInterval(moveLeft, 1);
-            this.afterMoveStart();
+            speed = this.pixelsPerInterval * this.images.length;
+            this.slideRight(speed);
         }
     }
     
     previous = () => {
+        let speed;
         if (this.index > 0) {
             this.index--;
-
-            const moveRight = () => {
-                this.wrapper.style.left = (parseInt(this.wrapper.style.left) + this.pixelsPerInterval) + 'px';
-                if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
-                    clearInterval(nextInterval);
-                    this.afterMoveStop();
-                }
-            }
-
-            const nextInterval = setInterval(moveRight, 1);
-            this.afterMoveStart();
+            speed = this.pixelsPerInterval;
+            this.slideRight(speed);
         }
         else {
             this.index = this.images.length-1;
-
-            const moveRight = () => {
-                this.wrapper.style.left = (parseInt(this.wrapper.style.left) - this.pixelsPerInterval*3) + 'px';
-                if (parseInt(this.wrapper.style.left) === (- this.index * parseInt(this.width))) {
-                    clearInterval(nextInterval);
-                    this.afterMoveStop();
-                }
-            }
-
-            const nextInterval = setInterval(moveRight, 1);
-            this.afterMoveStart();
+            speed = -this.pixelsPerInterval * this.images.length;
+            this.slideLeft(speed);
         }
     }
 }
