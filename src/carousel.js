@@ -16,7 +16,7 @@ class Carousel {
         // create attributes needed for processing
         this.index = 0; // stores current index of navigator
         this.images = this.wrapper.getElementsByTagName('img');
-        this.pixelsPerInterval = 10; // determines how much the images slides in pixels when slide is called. Lower means smoother animation
+        this.pixelsPerFrame = 10; // determines how much the images slides in pixels when slide is called. Lower means smoother animation
 
         //create attributes needed for new elements
         this.rightButton;
@@ -127,11 +127,11 @@ class Carousel {
                 if (prev_index == this.index)
                     return; // if no change in index don't move
                 else if (prev_index > this.index) {
-                    speed = this.pixelsPerInterval * this.images.length;
+                    speed = this.pixelsPerFrame * Math.abs(prev_index-this.index);
                     this.slideRight(speed);
                 }
                 else {
-                    speed = -this.pixelsPerInterval * this.images.length;
+                    speed = -this.pixelsPerFrame * Math.abs(prev_index-this.index);
                     this.slideLeft(speed);
                 }
             });
@@ -147,12 +147,12 @@ class Carousel {
         let speed;
         if (this.index < this.images.length - 1) {
             this.index++;
-            speed = -this.pixelsPerInterval;
+            speed = -this.pixelsPerFrame;
             this.slideLeft(speed);
         }
         else {
             this.index = 0;
-            speed = this.pixelsPerInterval * this.images.length;
+            speed = this.pixelsPerFrame * this.images.length;
             this.slideRight(speed);
         }
     }
@@ -161,12 +161,12 @@ class Carousel {
         let speed;
         if (this.index > 0) {
             this.index--;
-            speed = this.pixelsPerInterval;
+            speed = this.pixelsPerFrame;
             this.slideRight(speed);
         }
         else {
             this.index = this.images.length-1;
-            speed = -this.pixelsPerInterval * this.images.length;
+            speed = -this.pixelsPerFrame * this.images.length;
             this.slideLeft(speed);
         }
     }
