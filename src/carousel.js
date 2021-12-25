@@ -16,7 +16,6 @@ class Carousel {
         // create attributes needed for processing
         this.index = 0; // stores current index of navigator
         this.images = this.wrapper.getElementsByTagName('img');
-        this.pixelsPerFrame = 10; // determines how much the image move in pixels when slide method is called. Lower value means smoother animation
 
         //create attributes needed for new elements
         this.rightButton;
@@ -55,7 +54,7 @@ class Carousel {
         // function that sets same attributes for both buttons. used to reduce code repetition
         const styleButton = (button) => {
             button.style.position = 'absolute';
-            button.style.top = parseInt(this.height)/2 - 32 + 'px'; // calculate on the basis of height
+            button.style.top = parseFloat(this.height)/2 - 32 + 'px'; // calculate on the basis of height
             button.style.backgroundColor = 'rgba(0,0,0,0)'; // set transparency
             button.style.border = 'none';
             button.style.fontSize = '48px';
@@ -89,28 +88,21 @@ class Carousel {
         this.container.appendChild(this.leftButton);
     }
 
-    slideLeft = (speed) => {
-        if (parseInt(this.wrapper.style.left) > (- this.index * parseInt(this.width))){
-            this.wrapper.style.left = (parseInt(this.wrapper.style.left) + speed) + 'px';
-            window.requestAnimationFrame(() => this.slideLeft(speed));
-        }
-        else
-            this.radio[this.index].checked = true;
-    }
-
-    slideRight = (speed) => {
-        if (parseInt(this.wrapper.style.left) < (- this.index * parseInt(this.width))){
-            this.wrapper.style.left = (parseInt(this.wrapper.style.left) + speed) + 'px';
-            window.requestAnimationFrame(() => this.slideRight(speed));
-        }
-        else
-            this.radio[this.index].checked = true;
+    slide = () => {
+        this.wrapper.animate([
+            { left: - this.index * parseFloat(this.width) + 'px'}
+        ], {
+            duration: 1000,
+            iterations: 1,
+            fill: 'forwards'
+        })
+        this.radio[this.index].checked = true;  
     }
 
     setupIndicator = () => {
         this.radioGroup = document.createElement('div');
         this.radioGroup.style.position = 'absolute';
-        this.radioGroup.style.left = (parseInt(this.width)/2) - (this.images.length*15/2) + 'px'; // width/2 - width_of_indicator/2 
+        this.radioGroup.style.left = (parseFloat(this.width)/2) - (this.images.length*15/2) + 'px'; // width/2 - width_of_indicator/2 
         this.radioGroup.style.bottom = '0px';
 
         for (let i=0; i<this.images.length; i++) {
@@ -124,17 +116,11 @@ class Carousel {
             newRadio.addEventListener('click', () => {
                 let prev_index = this.index;
                 this.index = parseInt(newRadio.value);
-                let speed;
 
                 if (prev_index == this.index)
                     return; // if no change in index don't move
-                else if (prev_index > this.index) {
-                    speed = this.pixelsPerFrame * Math.abs(prev_index-this.index);
-                    this.slideRight(speed);
-                }
                 else {
-                    speed = -this.pixelsPerFrame * Math.abs(prev_index-this.index);
-                    this.slideLeft(speed);
+                    this.slide();
                 }
             });
 
@@ -146,30 +132,24 @@ class Carousel {
     }
 
     next = () => {
-        let speed;
         if (this.index < this.images.length - 1) {
             this.index++;
-            speed = -this.pixelsPerFrame;
-            this.slideLeft(speed);
+            this.slide();
         }
         else {
             this.index = 0;
-            speed = this.pixelsPerFrame * this.images.length;
-            this.slideRight(speed);
+            this.slide();
         }
     }
     
     previous = () => {
-        let speed;
         if (this.index > 0) {
             this.index--;
-            speed = this.pixelsPerFrame;
-            this.slideRight(speed);
+            this.slide();
         }
         else {
             this.index = this.images.length-1;
-            speed = -this.pixelsPerFrame * this.images.length;
-            this.slideLeft(speed);
+            this.slide();
         }
     }
 }
