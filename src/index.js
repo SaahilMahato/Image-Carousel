@@ -1,1 +1,1 @@
-const carousel = new Carousel('.carousel-container', '500px', '300px');
+const carousel = new Carousel('.carousel-container');

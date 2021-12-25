@@ -5,13 +5,13 @@
 */
 
 class Carousel {
-    constructor(containerSelector, width, height) {
+    constructor(containerSelector) {
 
         // store arguments
         this.container = document.querySelector(containerSelector);
         this.wrapper = this.container.querySelector('.carousel-image-wrapper');
-        this.width = width;
-        this.height = height;
+        this.width = window.getComputedStyle(this.container).getPropertyValue('width');
+        this.height = window.getComputedStyle(this.container).getPropertyValue('height');
 
         // create attributes needed for processing
         this.index = 0; // stores current index of navigator

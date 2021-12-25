@@ -25,4 +25,6 @@ p {
 
 .carousel-container {
     margin: 2% auto;
+    width: 700px;
+    height: 400px;
 }
