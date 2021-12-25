@@ -5,10 +5,10 @@
 */
 
 class Carousel {
-    constructor(container, width, height) {
+    constructor(containerSelector, width, height) {
 
         // store arguments
-        this.container = document.querySelector(container);
+        this.container = document.querySelector(containerSelector);
         this.wrapper = this.container.querySelector('.carousel-image-wrapper');
         this.width = width;
         this.height = height;
@@ -16,7 +16,7 @@ class Carousel {
         // create attributes needed for processing
         this.index = 0; // stores current index of navigator
         this.images = this.wrapper.getElementsByTagName('img');
-        this.pixelsPerFrame = 10; // determines how much the images slides in pixels when slide is called. Lower means smoother animation
+        this.pixelsPerFrame = 10; // determines how much the image move in pixels when slide method is called. Lower value means smoother animation
 
         //create attributes needed for new elements
         this.rightButton;
@@ -93,16 +93,18 @@ class Carousel {
         if (parseInt(this.wrapper.style.left) > (- this.index * parseInt(this.width))){
             this.wrapper.style.left = (parseInt(this.wrapper.style.left) + speed) + 'px';
             window.requestAnimationFrame(() => this.slideLeft(speed));
-            this.radio[this.index].checked = true;
         }
+        else
+            this.radio[this.index].checked = true;
     }
 
     slideRight = (speed) => {
         if (parseInt(this.wrapper.style.left) < (- this.index * parseInt(this.width))){
             this.wrapper.style.left = (parseInt(this.wrapper.style.left) + speed) + 'px';
             window.requestAnimationFrame(() => this.slideRight(speed));
-            this.radio[this.index].checked = true;
         }
+        else
+            this.radio[this.index].checked = true;
     }
 
     setupIndicator = () => {
