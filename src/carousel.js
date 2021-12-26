@@ -1,7 +1,5 @@
 /**
     * @param {string} container - name of the container with .for classname and # for id
-    * @param {string} width - width of the container
-    * @param {string} height - height of the container
 */
 
 class Carousel {
